@@ -13,6 +13,10 @@
     "diagnostico": "node scripts/flow-cli.mjs diagnostico",
     "banco": "node scripts/flow-cli.mjs banco",
     "fallback": "node scripts/flow-cli.mjs fallback",
+    "db:status": "node scripts/flow-cli.mjs db status",
+    "db:migrar": "node scripts/flow-cli.mjs db migrar",
+    "db:seed": "node scripts/flow-cli.mjs db seed",
     "start": "node painel/server.mjs"
   }
 }
+

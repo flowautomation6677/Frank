@@ -141,3 +141,4 @@ test('Módulo Hermes & Orquestração Multi-Agente', async (t) => {
     assert.equal(evFim.modelo, 'gpt-4o');
   });
 });
+

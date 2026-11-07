@@ -430,11 +430,17 @@ Comandos:
   ${CORES.verde}fallback aplicar${CORES.reset}  Injeta cadeia de resiliência Multi-LLM nos arquivos config.yaml
                     Opções: [--dir <pasta-hermes>]
 
+  ${CORES.verde}db status${CORES.reset}         Exibe a versão do schema, migrações e totais de agentes/conhecimento
+  ${CORES.verde}db migrar${CORES.reset}         Executa migrações SQL pendentes de forma transacional e versionada
+  ${CORES.verde}db seed${CORES.reset}           Importa os 8 agentes físicos e base de conhecimento para o banco SQLite
+  ${CORES.verde}db sincronizar${CORES.reset}    Exporta agentes e conhecimento do banco para os perfis locais do Hermes
+
 Exemplos:
   node scripts/flow-cli.mjs diagnostico
-  node scripts/flow-cli.mjs diagnostico --fix
+  node scripts/flow-cli.mjs db migrar
+  node scripts/flow-cli.mjs db status
+  node scripts/flow-cli.mjs db seed
   node scripts/flow-cli.mjs banco situacao --banco ./empresa/banco
-  node scripts/flow-cli.mjs fallback aplicar
 `);
 }
 
@@ -508,6 +514,68 @@ async function main() {
     }
   }
 
+  if (comando === 'db') {
+    const subcomando = args[1] || 'status';
+    const { obterServicoBanco } = await import('../painel/functions/_lib/db/servico.js');
+    const { statusMigracoes, executarMigracoes } = await import('../painel/functions/_lib/db/migracoes.js');
+    const servico = obterServicoBanco();
+
+    if (subcomando === 'status') {
+      const status = statusMigracoes(servico.db);
+      const totalAgentes = servico.agentes.listar().length;
+      const situacaoConhecimento = servico.conhecimento.obterSituacao();
+
+      console.log(`\n${CORES.ciano}${CORES.negrito}Status do Banco de Dados & Schema ORM (SQLite):${CORES.reset}`);
+      console.log(`  Migrações aplicadas: ${CORES.verde}${status.aplicadas.length}${CORES.reset} / ${status.totalDisponiveis}`);
+      if (status.pendentes.length > 0) {
+        console.log(`  Migrações pendentes: ${CORES.amarelo}${status.pendentes.length}${CORES.reset}`);
+        status.pendentes.forEach((m) => console.log(`    - [PENDENTE] ${m.nome}`));
+      } else {
+        console.log(`  Status das migrações: ${CORES.verde}Schema 100% atualizado.${CORES.reset}`);
+      }
+      console.log(`  Agentes cadastrados: ${CORES.verde}${totalAgentes}${CORES.reset}`);
+      console.log(`  Itens de conhecimento: ${CORES.verde}${situacaoConhecimento.totalItens || 0}${CORES.reset} (${situacaoConhecimento.itensPendentes || 0} pendentes)`);
+      console.log();
+      process.exit(0);
+    }
+
+    if (subcomando === 'migrar') {
+      const resultado = executarMigracoes(servico.db);
+      if (resultado.executadas.length > 0) {
+        console.log(`${CORES.verde}Migrações executadas com sucesso (${resultado.executadas.length}):${CORES.reset}`);
+        resultado.executadas.forEach((m) => console.log(`  - [OK] ${m.nome}`));
+      } else {
+        console.log(`${CORES.verde}Nenhuma migração pendente. Banco de dados já está na versão mais recente.${CORES.reset}`);
+      }
+      process.exit(0);
+    }
+
+    if (subcomando === 'seed') {
+      const pastaAgentes = path.join(ROOT_DIR, 'agentes');
+      const importados = servico.agentes.importarDoDisco(pastaAgentes);
+      const pastaModelo = path.join(ROOT_DIR, 'agentes', 'frank', 'skills', 'onboarding-da-empresa', 'references', 'modelo');
+      const itensConhecimento = servico.conhecimento.importarDeMarkdown(pastaModelo);
+
+      console.log(`${CORES.verde}Carga inicial (seed) concluída com sucesso:${CORES.reset}`);
+      console.log(`  - ${importados} perfis de agentes importados de ${pastaAgentes}`);
+      console.log(`  - ${itensConhecimento} itens de conhecimento importados de ${pastaModelo}`);
+      process.exit(0);
+    }
+
+    if (subcomando === 'sincronizar') {
+      const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
+      const pastaPerfis = path.join(localAppData, 'hermes', 'profiles');
+      const sincronizados = servico.agentes.sincronizarTodosParaDisco(pastaPerfis);
+      console.log(`${CORES.verde}Agentes sincronizados com o motor Hermes em: ${pastaPerfis}${CORES.reset}`);
+      sincronizados.forEach((p) => console.log(`  - [OK] ${p}`));
+      process.exit(0);
+    }
+
+    console.error(`${CORES.vermelho}Subcomando do db não reconhecido: ${subcomando}${CORES.reset}`);
+    exibirAjuda();
+    process.exit(1);
+  }
+
   console.error(`${CORES.vermelho}Comando não reconhecido: ${comando}${CORES.reset}`);
   exibirAjuda();
   process.exit(1);
@@ -539,3 +607,4 @@ function exibirRelatorioSituacao(situacao) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main();
 }
+

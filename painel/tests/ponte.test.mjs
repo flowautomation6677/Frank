@@ -100,3 +100,4 @@ test('Módulo Ponte & Gestão do Cérebro LLM', async (t) => {
     assert.equal(corpo.provedores[0].id, 'openai-api');
   });
 });
+

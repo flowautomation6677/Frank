@@ -91,15 +91,42 @@ npm run banco criar -- --banco ./empresa/banco
 # 4. Injeção e atualização de resiliência Multi-LLM (Fallback)
 npm run fallback
 
-# 5. Menu de ajuda interativo
+# 5. Gerenciamento do banco de dados relacional e migrações (ORM SQLite)
+npm run db:status
+npm run db:migrar
+npm run db:seed
+
+# 6. Menu de ajuda interativo
 npm run cli ajuda
 ```
 
 ---
 
+## 🗄️ Gerenciamento de Dados, ORM & Registro Dinâmico de Agentes
+
+### Registro Dinâmico de Agentes (Sem necessidade de commits)
+Diferente da arquitetura legada baseada unicamente em pastas e arquivos Markdown estáticos, o sistema agora conta com um **Catálogo Dinâmico de Agentes e Prompts** no SQLite nativo do Node.js:
+- **Endpoints REST**:
+  - `GET /api/frank/agentes`: Lista agentes e status de ativação.
+  - `POST /api/frank/agentes`: Criação dinâmica de novos agentes de IA sem reiniciar o servidor.
+  - `GET /api/frank/agentes/:id`: Consulta detalhes, `soul_prompt` e habilidades associadas.
+  - `PUT /api/frank/agentes/:id`: Edição em tempo real de personas, prompts de conduta, tom de voz e modelos.
+  - `DELETE /api/frank/agentes/:id`: Desativação lógica do agente.
+- **Sincronização em Tempo de Execução**: Alterações salvas no banco são automaticamente serializadas para as pastas de perfis do Hermes (`SOUL.md`, `config.yaml`, `DESCRICAO.txt`, `skills/`).
+
+### Controle de Migrações Versionadas (ORM)
+- **Engine de Migrações**: Migrações SQL numeradas (`001_schema_inicial.sql`) com controle transacional e verificação de integridade via checksum SHA-256.
+- **Tabelas Relacionais Estruturadas**:
+  - `agentes` & `agente_skills`: Perfis dinâmicos, prompts de sistema, modelos padrão e habilidades.
+  - `conhecimento_empresa`: Base de onboarding estruturada em blocos relacionais, substituindo scripts manuais avulsos.
+  - `demandas`: Registro de tarefas, status, entregas e decisões humanas (HITL) com proteção Anti-IDOR nativa.
+  - `auditoria_logs`: Trilha de auditoria para rastreabilidade de alterações em agentes e dados.
+
+---
+
 ## ⚙️ Pipelines de CI/CD & Auditoria de Segurança
 O repositório possui fluxos automatizados do GitHub Actions em `.github/workflows/`:
-- **Suite de Testes Automatizados**: Execução contínua de 35 testes unitários e de integração em Node.js 22 LTS.
+- **Suite de Testes Automatizados**: Execução contínua de 43 testes unitários e de integração em Node.js 22 LTS.
 - **Validação de Sintaxe**: Checagem de JavaScript (Node 22), Python 3.11 e JSONs.
 - **Auditoria AppSec**: Varredura contra chaves de API expostas, conferência de hashes SHA-256 de Supply Chain e conformidade OWASP LLM.
 - **Docker Build Validation**: Garantia de integridade do contêiner a cada commit.
