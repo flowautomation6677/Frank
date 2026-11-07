@@ -172,6 +172,11 @@ export async function decidirAprovacao(request, env, runId, fetchFn = fetch) {
   if (decisao !== 'sim' && decisao !== 'nao') throw new ErroHttp(400, "decisao precisa ser 'sim' ou 'nao'.");
   const demanda = await acharDemandaDoRun(env, runId);
   if (!demanda) throw new ErroHttp(404, 'Turno não encontrado.');
+  // Defesa Anti-IDOR: Validação composta de posse do recurso
+  const donoEsperado = nomeDoDono(env);
+  if (donoEsperado && demanda.nome && demanda.nome !== donoEsperado) {
+    throw new ErroHttp(403, 'Acesso negado: turno pertence a outra organização (IDOR Protection).');
+  }
   // Sem identidade não há fallback para o último pedido: clientes antigos devem atualizar o painel.
   if (typeof requestId !== 'string' || !requestId.trim()) throw new ErroHttp(409, MOTIVO_SEM_AUTORIZACAO);
   const erro = await alterarDemanda(env, demanda.id, async (atual) => {
@@ -207,7 +212,13 @@ export async function criarDemanda(request, env) {
 
 export async function responderDemanda(env, id) {
   exigirHermes(env);
-  return responderJson(200, await lerDemanda(env, id));
+  const demanda = await lerDemanda(env, id);
+  // Defesa Anti-IDOR: Validação composta de posse do recurso
+  const donoEsperado = nomeDoDono(env);
+  if (donoEsperado && demanda.nome && demanda.nome !== donoEsperado) {
+    throw new ErroHttp(403, 'Acesso negado: demanda pertence a outra organização (IDOR Protection).');
+  }
+  return responderJson(200, demanda);
 }
 
 function registrarEntrega(env, demandaId, runId, evento) {
@@ -287,6 +298,11 @@ export async function abrirEventos(env, runId, fetchFn = fetch) {
   if (typeof runId !== 'string' || !ID_DO_RUN.test(runId)) throw new ErroHttp(404, 'Turno não encontrado.');
   const demanda = await acharDemandaDoRun(env, runId);
   if (!demanda) throw new ErroHttp(404, 'Turno não encontrado.');
+  // Defesa Anti-IDOR: Validação composta de posse do recurso
+  const donoEsperado = nomeDoDono(env);
+  if (donoEsperado && demanda.nome && demanda.nome !== donoEsperado) {
+    throw new ErroHttp(403, 'Acesso negado: turno pertence a outra organização (IDOR Protection).');
+  }
   const { iniciadoEm } = demanda.runs.find((run) => run.runId === runId);
 
   let painel = null;

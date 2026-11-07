@@ -88,10 +88,27 @@ $HermesHome = Join-Path $env:LOCALAPPDATA "hermes"
 $HermesCmd  = Join-Path $HermesHome "bin\hermes.cmd"
 
 if (-not (Test-Path $HermesCmd)) {
-    Write-Host "  -> Instalando motor de IA (pode levar 3 a 5 minutos)..." -ForegroundColor Cyan
+    Write-Host "  -> Instalando motor de IA com verificação criptográfica SHA-256..." -ForegroundColor Cyan
     $InstallerUrl = "https://raw.githubusercontent.com/NousResearch/hermes-agent/a50406d9b7474b060450d2dcaff8743c977d296a/scripts/install.ps1"
     $TempInstaller = Join-Path $env:TEMP "hermes-install-flow.ps1"
+    
+    # 1. Conexão estritamente segura (TLS 1.2 / TLS 1.3)
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
     Invoke-WebRequest -Uri $InstallerUrl -OutFile $TempInstaller -UseBasicParsing
+
+    # 2. Verificação de Integridade Criptográfica (Prevenção contra Supply Chain e MitM)
+    $ExpectedHash = "E8B0E5D378D005A733E2750AF2727F0BBA86378AC9BDB79FC45D06DFE7F36C97"
+    $ActualHash = (Get-FileHash -Path $TempInstaller -Algorithm SHA256).Hash
+    if ($ActualHash -ne $ExpectedHash) {
+        Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
+        Write-Host "ERRO CRÍTICO (Supply Chain): Falha na validação de integridade SHA-256 do instalador." -ForegroundColor Red
+        Write-Host "  Esperado : $ExpectedHash" -ForegroundColor Red
+        Write-Host "  Calculado: $ActualHash" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  [OK] Assinatura SHA-256 validada com sucesso." -ForegroundColor Green
+
+    # 3. Execução em Modo Usuário (Menor Privilégio - Zero Admin)
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File $TempInstaller -Commit a50406d9b7474b060450d2dcaff8743c977d296a -NonInteractive -SkipBrowser -SkipComputerUse
 }
 
