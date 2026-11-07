@@ -1,0 +1,45 @@
+# ==============================================================================
+# Flow Automation · Docker Compose
+# Orquestração do Time de Agentes Autônomos de IA & Painel de Voz
+# ==============================================================================
+
+services:
+  frank:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flowautomation/frank:latest
+    container_name: flow-automation-frank
+    restart: unless-stopped
+    ports:
+      - "8787:8787"   # Painel Web de Voz (Navegador)
+      - "8642:8642"   # Hermes API Gateway (8 Agentes)
+    environment:
+      # Chaves de IA & Mensageria
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
+      - TELEGRAM_HOME_CHANNEL=${TELEGRAM_HOME_CHANNEL:-}
+      # Identidade da Empresa
+      - FRANK_NOME_DO_DONO=${FRANK_NOME_DO_DONO:-Luiz Antonio}
+      - FRANK_NOME_DA_EMPRESA=${FRANK_NOME_DA_EMPRESA:-Flow Automation}
+      - FRANK_ACCESS_CODE=${FRANK_ACCESS_CODE:-}
+    volumes:
+      - frank_data:/app/data
+      - hermes_home:/home/hermes/.hermes
+      - empresa_banco:/home/hermes/empresa/banco
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8787/api/saude || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  frank_data:
+    name: flow_automation_frank_data
+  hermes_home:
+    name: flow_automation_hermes_home
+  empresa_banco:
+    name: flow_automation_empresa_banco

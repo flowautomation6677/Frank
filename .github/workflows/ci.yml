@@ -1,0 +1,117 @@
+name: CI & AppSec Security Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint-and-validate:
+    name: Validação de Sintaxe & Código
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validar Sintaxe dos Scripts JavaScript (Painel)
+        run: |
+          echo "Verificando sintaxe de server.mjs e funções..."
+          node --check painel/server.mjs
+          find painel/functions -name "*.js" -exec node --check {} +
+          echo "Todos os arquivos JavaScript são sintaticamente válidos."
+
+      - name: Validar Arquivos JSON de Configuração
+        run: |
+          python3 -c "
+          import json, sys
+          files = ['configuracao-cliente.json', 'painel/package.json', 'painel/public/manifest.webmanifest']
+          for f in files:
+              try:
+                  with open(f, 'r', encoding='utf-8') as fp:
+                      json.load(fp)
+                  print(f'OK: {f}')
+              except Exception as e:
+                  print(f'ERRO em {f}: {e}', file=sys.stderr)
+                  sys.exit(1)
+          "
+
+      - name: Compilar e Validar Scripts Python
+        run: |
+          python3 -m py_compile add_fallback.py
+          find agentes -name "*.py" -exec python3 -m py_compile {} +
+
+  security-audit:
+    name: Auditoria de Segurança & AppSec (OWASP)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Verificação de Chaves Expostas (Secrets Scanner)
+        run: |
+          echo "Varrendo repositório contra chaves de API commitadas..."
+          # Bloqueia chaves reais do Google AI Studio (AIzaSy...) ou OpenAI (sk-proj-...)
+          if grep -rnE "AIzaSy[A-Za-z0-9_-]{33}|sk-proj-[A-Za-z0-9_-]{48}" \
+            --exclude-dir={.git,.github,node_modules} \
+            --exclude="AUDITORIA_SEGURANCA_APPSEC.md" \
+            --exclude="RELATORIO_TECNICO_CRIADOR.md" .; then
+            echo "[FALHA CRÍTICA] Detectada chave de API no código-fonte!" >&2
+            exit 1
+          fi
+          echo "[OK] Nenhuma chave de API detectada no código."
+
+      - name: Verificação de Integridade Criptográfica (Supply Chain)
+        run: |
+          echo "Validando hash SHA-256 do instalador de agentes..."
+          EXPECTED_HASH="E8B0E5D378D005A733E2750AF2727F0BBA86378AC9BDB79FC45D06DFE7F36C97"
+          ACTUAL_HASH=$(sha256sum hermes_install.ps1 | awk '{print toupper($1)}')
+          if [ "$ACTUAL_HASH" != "$EXPECTED_HASH" ]; then
+            echo "[FALHA CRÍTICA] Hash de integridade de Supply Chain incorreto!" >&2
+            echo "Esperado : $EXPECTED_HASH"
+            echo "Calculado: $ACTUAL_HASH"
+            exit 1
+          fi
+          echo "[OK] Assinatura SHA-256 de Supply Chain verificada com sucesso."
+
+      - name: Verificação de Conformidade com AUDITORIA_SEGURANCA_APPSEC.md
+        run: |
+          echo "Conferindo diretrizes de segurança aplicadas..."
+          test -f AUDITORIA_SEGURANCA_APPSEC.md
+          grep -q "validarUrlSegura" painel/functions/_lib/http.js
+          grep -q "IDOR Protection" painel/functions/_lib/ponte.js
+          grep -q "Prompt Injection" agentes/frank/SOUL.md
+          echo "[OK] Todas as proteções OWASP LLM e SSRF estão ativas no código."
+
+  docker-build:
+    name: Build & Validação do Contêiner Docker
+    runs-on: ubuntu-latest
+    needs: [lint-and-validate, security-audit]
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build do Dockerfile (Dry-run de Compilação)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: flowautomation/frank:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

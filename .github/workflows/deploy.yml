@@ -1,0 +1,32 @@
+name: Release & Deployment Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Criar Release & Publicar Artefatos
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Gerar Pacote de Instalação Turnkey (ZIP)
+        run: |
+          mkdir -p release-pkg
+          cp -r agentes painel scripts configuracao-cliente.json Instalar-Flow-Automation.bat README.md release-pkg/
+          cd release-pkg
+          zip -r ../flow-automation-frank-release.zip .
+          cd ..
+          echo "Pacote ZIP compilado com sucesso."
+
+      - name: Publicar Release no GitHub
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: flow-automation-frank-release.zip
+          generate_release_notes: true

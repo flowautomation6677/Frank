@@ -1,0 +1,9 @@
+.git
+.github
+.env
+*.env
+node_modules
+*.log
+*.tmp
+tempmediaStorage
+.system_generated
