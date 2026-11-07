@@ -137,7 +137,7 @@ function pastaDoHermes(env) {
 function executarCli(env, argumentos) {
   const ambiente = { ...process.env, ...(espacosSimples(env?.HERMES_HOME) ? { HERMES_HOME: espacosSimples(env.HERMES_HOME) } : {}) };
   return new Promise((resolver, rejeitar) => {
-    execFile(binarioDoHermes(env), argumentos, { cwd: os.homedir(), env: ambiente, timeout: PRAZO_DA_CLI_MS, maxBuffer: LIMITE_DA_SAIDA, windowsHide: true }, (erro, saida, saidaDeErro) => {
+    execFile(binarioDoHermes(env), argumentos, { cwd: os.homedir(), env: ambiente, timeout: PRAZO_DA_CLI_MS, maxBuffer: LIMITE_DA_SAIDA, windowsHide: true, shell: process.platform === 'win32' }, (erro, saida, saidaDeErro) => {
       if (erro) {
         erro.saidaDeErro = texto(saidaDeErro);
         rejeitar(erro);
