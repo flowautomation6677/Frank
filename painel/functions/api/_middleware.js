@@ -9,14 +9,19 @@ function codigosIguais(recebido, esperado) {
   return diferenca === 0;
 }
 
-export function onRequest({ request, env, next }) {
+export async function onRequest({ request, env, next }) {
   const origem = request.headers.get('origin');
   const site = request.headers.get('sec-fetch-site');
   // Mesmo loopback recebe POSTs simples de outras páginas. CORS sozinho não impede o efeito.
   if ((origem !== null && origem !== new URL(request.url).origin) || (site && site !== 'same-origin' && site !== 'none')) {
     return responderErro(new ErroHttp(403, 'Origem não autorizada. Abra o painel do Frank no endereço do servidor.'));
   }
-  if (request.method === 'GET' && new URL(request.url).pathname === '/api/saude') return next();
+  if (request.method === 'GET' && new URL(request.url).pathname === '/api/saude') {
+    const respSaude = await next();
+    respSaude.headers.set('X-Content-Type-Options', 'nosniff');
+    respSaude.headers.set('X-Frame-Options', 'DENY');
+    return respSaude;
+  }
   const esperado = env.FRANK_ACCESS_CODE;
   if (esperado && !codigosIguais(request.headers.get('x-frank-code') ?? '', esperado)) {
     return responderErro(new ErroHttp(401, 'Código de acesso ausente ou incorreto. Informe o código do Frank para continuar.'));
@@ -25,5 +30,9 @@ export function onRequest({ request, env, next }) {
     const tipo = (request.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
     if (tipo !== 'application/json') return responderErro(new ErroHttp(415, 'Envie o pedido como application/json.'));
   }
-  return next();
+  const resposta = await next();
+  resposta.headers.set('X-Content-Type-Options', 'nosniff');
+  resposta.headers.set('X-Frame-Options', 'DENY');
+  resposta.headers.set('Referrer-Policy', 'no-referrer');
+  return resposta;
 }

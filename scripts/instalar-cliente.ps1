@@ -184,6 +184,12 @@ $LogsDir    = Join-Path $PastaFrank "logs"
 New-Item -ItemType Directory -Force -Path $ServiceDir | Out-Null
 New-Item -ItemType Directory -Force -Path $LogsDir | Out-Null
 
+# Hardening de Permissões (ACLs no Windows - Prevenção contra LPE)
+try {
+    & icacls "$PastaFrank" /inheritance:r /grant:r "$($env:USERNAME):(OI)(CI)F" /grant:r "SYSTEM:(OI)(CI)F" | Out-Null
+    Write-Host "  [OK] Permissões ACLs endurecidas (apenas $env:USERNAME e SYSTEM)." -ForegroundColor Green
+} catch {}
+
 $WatchdogPs1 = Join-Path $ServiceDir "flow-watchdog.ps1"
 Copy-Item (Join-Path $RepoDir "service\flow-watchdog.ps1" -ErrorAction SilentlyContinue) $WatchdogPs1 -Force -ErrorAction SilentlyContinue
 
