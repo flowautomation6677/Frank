@@ -39,28 +39,37 @@ Flow Automation (Frank)
 
 ## 🚀 Instalação Rápida (Para Clientes)
 
-Para instalar em qualquer computador Windows (Windows 10 ou 11):
-
-1. Abra o **PowerShell** no computador da cliente.
-2. Clone este repositório ou baixe o pacote:
+### Opção A: No Windows (Instalador Nativo de 2 Cliques)
+1. Baixe o ZIP deste repositório ou clone:
    ```powershell
-   git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
-   cd SEU_REPOSITORIO
+   git clone https://github.com/flowautomation6677/Frank.git
+   cd Frank
    ```
-3. Execute o instalador automatizado da Flow Automation:
+2. Dê **dois cliques** no arquivo `Instalar-Flow-Automation.bat` ou rode no PowerShell:
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\scripts\instalar-cliente.ps1
    ```
-4. O instalador solicitará:
-   - Nome da Cliente / Responsável
-   - Nome da Empresa
-   - O que a empresa vende
-5. Conecte a inteligência artificial (ChatGPT):
-   ```powershell
-   hermes auth add openai-codex --type oauth
-   ```
-   *Um link e um código serão exibidos para autorização rápida no navegador.*
-6. **Pronto!** Um atalho **Abrir Frank** será criado automaticamente na Área de Trabalho.
+3. O instalador configura os 8 agentes, valida a integridade SHA-256 e cria o atalho `Abrir Frank` na Área de Trabalho.
+
+### Opção B: Via Docker / Nuvem (Linux, macOS, AWS, VPS)
+Para rodar em contêiner isolado em qualquer servidor ou computador:
+```bash
+# 1. Clone o repositório
+git clone https://github.com/flowautomation6677/Frank.git
+cd Frank
+
+# 2. Inicie com Docker Compose
+docker compose up -d
+```
+*O painel web de voz estará disponível imediatamente em `http://localhost:8787` e a API na porta `8642`.*
+
+---
+
+## ⚙️ Pipelines de CI/CD & Auditoria de Segurança
+O repositório possui fluxos automatizados do GitHub Actions em `.github/workflows/`:
+- **Validação de Sintaxe**: Checagem de JavaScript (Node 22), Python 3.11 e JSONs.
+- **Auditoria AppSec**: Varredura contra chaves de API expostas, conferência de hashes SHA-256 de Supply Chain e conformidade OWASP LLM.
+- **Docker Build Validation**: Garantia de integridade do contêiner a cada commit.
 
 ---
 
