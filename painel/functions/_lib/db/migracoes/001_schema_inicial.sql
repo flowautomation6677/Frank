@@ -90,3 +90,4 @@ CREATE TABLE IF NOT EXISTS auditoria_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_auditoria_tipo ON auditoria_logs(tipo);
+

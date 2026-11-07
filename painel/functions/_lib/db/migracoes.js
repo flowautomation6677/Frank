@@ -94,3 +94,4 @@ export function executarMigracoes(db, pasta = PASTA_MIGRACOES) {
 
   return { executadas, total: status.aplicadas.length + executadas.length };
 }
+

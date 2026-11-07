@@ -67,3 +67,4 @@ export function fecharBanco() {
     caminhoBancoAtual = null;
   }
 }
+
