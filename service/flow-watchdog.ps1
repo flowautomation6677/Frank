@@ -88,3 +88,4 @@ if (-not (Verificar-Painel)) {
 } else {
     Log "OK: Painel Web de Voz (Porta 8787) ativo."
 }
+
