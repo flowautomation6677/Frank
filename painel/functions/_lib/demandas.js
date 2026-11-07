@@ -58,6 +58,7 @@ export function novaDemanda({ titulo, saudacao, cerebro = null, nome = '', agora
   const momento = agora.toISOString();
   return {
     id: novoIdDeDemanda(agora),
+    nome: nome || '',
     titulo: titulo || null,
     criadaEm: momento,
     atualizadaEm: momento,

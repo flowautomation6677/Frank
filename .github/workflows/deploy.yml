@@ -30,3 +30,4 @@ jobs:
         with:
           files: flow-automation-frank-release.zip
           generate_release_notes: true
+

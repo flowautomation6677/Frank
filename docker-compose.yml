@@ -43,3 +43,4 @@ volumes:
     name: flow_automation_hermes_home
   empresa_banco:
     name: flow_automation_empresa_banco
+

@@ -122,3 +122,4 @@ PID_PAINEL=$!
 
 # Aguardar finalização de processos
 wait -n "$PID_PAINEL" "$PID_HERMES"
+
