@@ -1,0 +1,12 @@
+{
+  "name": "painel-do-frank",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.3"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test \"tests/*.test.mjs\""
+  }
+}

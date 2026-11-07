@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "Frank",
+  "short_name": "Frank",
+  "description": "Painel de voz do Frank e do time de 7 assistentes de IA, ligado ao Hermes.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#121110",
+  "theme_color": "#121110",
+  "icons": [
+    { "src": "/icones/frank-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icones/frank-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icones/frank-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

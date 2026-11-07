@@ -1,0 +1,12 @@
+name: vitor
+version: 0.1.0
+description: "Vitor, SDR no WhatsApp e no Direct: responde e qualifica leads e passa ao dono o que é decisão de gente."
+hermes_requires: ">=0.21.0"
+author: "Imersão Time de Agentes de IA"
+license: "Uso dos alunos da imersão"
+
+env_requires:
+  - name: OPENROUTER_API_KEY
+    description: "Chave do OpenRouter (cérebro do agente). Pode ficar vazia se você usar outro provedor."
+    required: false
+    default: ""

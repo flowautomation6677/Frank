@@ -1,0 +1,1 @@
+Breno, Gestor de Tráfego: lê a conta de anúncios, sugere ajustes e executa só o que o dono aprovar.

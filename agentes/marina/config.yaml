@@ -1,0 +1,17 @@
+# Configuração mínima. O instalador ajusta o provedor e o modelo escolhidos pelo aluno.
+model:
+  provider: openrouter
+  default: ""
+
+# Pedidos de aprovação no Telegram em português e áudio do dono transcrito como português.
+display:
+  language: pt
+stt:
+  language: pt
+# Banco de conhecimento da empresa: o Frank cria e preenche no onboarding; todos leem pela skill consultar-banco.
+skills:
+  config:
+    banco:
+      dir: /home/hermes/empresa/banco
+  auto_load:
+    - consultar-banco

@@ -1,0 +1,12 @@
+name: lara
+version: 0.1.0
+description: "Lara, Criadora de Posts e Reels: faz post, carrossel, roteiro e corte de Reels."
+hermes_requires: ">=0.21.0"
+author: "Imersão Time de Agentes de IA"
+license: "Uso dos alunos da imersão"
+
+env_requires:
+  - name: OPENROUTER_API_KEY
+    description: "Chave do OpenRouter (cérebro do agente). Pode ficar vazia se você usar outro provedor."
+    required: false
+    default: ""

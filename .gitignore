@@ -1,0 +1,44 @@
+# Arquivos de log e temporários
+*.log
+*.err.log
+*.tmp
+*.novo
+*.pid
+.hermes-update-in-progress
+*.known_hosts
+
+# Credenciais, scripts de teste locais e segredos (NUNCA enviar ao GitHub!)
+.env
+*.env
+!painel/painel.env.example
+respostas.json
+id_rsa*
+*.pem
+*.key
+time_do_frank*
+time-do-frank.config
+
+# Scripts de teste locais com chaves temporárias
+apply_*.py
+setup_flow_automation.py
+teste_codigo.js
+parse_page.js
+*.html
+*.tar.gz
+
+# Node.js e Python
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Dados locais e banco de conhecimento do cliente
+banco/
+dados/
+personalizados/
+dist/
+build/
+.DS_Store
+Thumbs.db

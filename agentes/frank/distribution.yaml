@@ -1,0 +1,18 @@
+name: frank
+version: 0.1.0
+description: "Frank, Agente principal: recebe o pedido do dono, distribui ao time pelo quadro e devolve pronto para aprovar."
+hermes_requires: ">=0.21.0"
+author: "Imersão Time de Agentes de IA"
+license: "Uso dos alunos da imersão"
+
+env_requires:
+  - name: OPENROUTER_API_KEY
+    description: "Chave do OpenRouter (cérebro do agente). Pode ficar vazia se você usar outro provedor."
+    required: false
+    default: ""
+  - name: TELEGRAM_BOT_TOKEN
+    description: "Token do bot do Telegram, criado no @BotFather. Só o Frank fala com o dono."
+    required: true
+  - name: TELEGRAM_ALLOWED_USERS
+    description: "Seu ID numérico do Telegram. Só esse ID consegue falar com o Frank."
+    required: true

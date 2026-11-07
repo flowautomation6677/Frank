@@ -1,0 +1,25 @@
+{
+  "empresa": {
+    "nome_do_dono": "Luiz Antonio",
+    "nome_da_empresa": "Flow Automation",
+    "o_que_vende": "Soluções de Automação de Processos com Inteligência Artificial e Agentes Autônomos",
+    "publico_alvo": "Empresas e profissionais que desejam automatizar operações, escalar atendimento e otimizar processos",
+    "tom_de_voz": "Especialista, inovador, direto, profissional e focado em resultados de negócio",
+    "palavras_proibidas": "nenhuma definida até agora"
+  },
+  "inteligencia_artificial": {
+    "provedor_primario": "gemini",
+    "modelo_primario": "gemini-3.5-flash",
+    "fallback_ativo": true,
+    "provedores_fallback": [
+      { "provider": "gemini", "model": "gemini-3.8-flash" },
+      { "provider": "openai-api", "model": "gpt-4o" }
+    ]
+  },
+  "chaves_de_acesso": {
+    "gemini_api_key": "COLOQUE_SUA_CHAVE_AQUI",
+    "openai_api_key": "COLOQUE_SUA_CHAVE_AQUI_SE_TIVER",
+    "telegram_bot_token": "COLOQUE_SEU_TOKEN_DO_BOTFATHER_AQUI"
+  }
+}
+

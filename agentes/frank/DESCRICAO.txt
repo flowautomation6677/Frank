@@ -1,0 +1,1 @@
+Frank, Agente principal: recebe o pedido do dono, distribui ao time pelo quadro e devolve pronto para aprovar.

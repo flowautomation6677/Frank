@@ -1,0 +1,19 @@
+# Credenciais: nunca publicar
+.env
+.env.*
+!.env.EXAMPLE
+auth.json
+auth.json.*
+platforms/
+# Dados do usuário e estado: nunca publicar
+memories/
+sessions/
+state.db*
+state-snapshots/
+logs/
+workspace/
+plans/
+home/
+local/
+*_cache/
+checkpoints/
