@@ -7,6 +7,10 @@
   },
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test \"tests/*.test.mjs\""
+    "test": "node --test \"tests/*.test.mjs\"",
+    "cli": "node ../scripts/flow-cli.mjs",
+    "diagnostico": "node ../scripts/flow-cli.mjs diagnostico",
+    "banco": "node ../scripts/flow-cli.mjs banco",
+    "fallback": "node ../scripts/flow-cli.mjs fallback"
   }
 }

@@ -65,8 +65,41 @@ docker compose up -d
 
 ---
 
+## 🧪 Engenharia de Qualidade, Testes & CLI Unificada
+
+### Suite de Testes Automatizados (Node.js Test Runner)
+O projeto conta com cobertura completa de testes unitários e de integração nativos em Node.js (sem dependências externas):
+```bash
+# Executa todos os testes unitários e de integração
+npm test
+```
+*Cobrem autorização vocal Human-in-the-Loop (HITL), orquestração de modelos no Hermes, formatação e isolamento de demandas, sanitização de segredos/SSRF e proteção IDOR/BOLA.*
+
+### CLI Unificada Flow Automation (`flow-cli.mjs`)
+Consolidação multiplataforma de scripts utilitários (substituindo scripts legados em Python e PowerShell):
+```bash
+# 1. Diagnóstico completo de integridade dos 8 agentes (Rede, Hermes, Web, Telegram, Fallback, Watchdog)
+npm run diagnostico
+
+# 2. Diagnóstico com reparo e auto-cura automática
+node scripts/flow-cli.mjs diagnostico --fix
+
+# 3. Gerenciamento do banco de conhecimento da empresa (onboarding)
+npm run banco situacao -- --banco ./empresa/banco
+npm run banco criar -- --banco ./empresa/banco
+
+# 4. Injeção e atualização de resiliência Multi-LLM (Fallback)
+npm run fallback
+
+# 5. Menu de ajuda interativo
+npm run cli ajuda
+```
+
+---
+
 ## ⚙️ Pipelines de CI/CD & Auditoria de Segurança
 O repositório possui fluxos automatizados do GitHub Actions em `.github/workflows/`:
+- **Suite de Testes Automatizados**: Execução contínua de 35 testes unitários e de integração em Node.js 22 LTS.
 - **Validação de Sintaxe**: Checagem de JavaScript (Node 22), Python 3.11 e JSONs.
 - **Auditoria AppSec**: Varredura contra chaves de API expostas, conferência de hashes SHA-256 de Supply Chain e conformidade OWASP LLM.
 - **Docker Build Validation**: Garantia de integridade do contêiner a cada commit.

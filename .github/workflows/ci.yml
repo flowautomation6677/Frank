@@ -25,27 +25,35 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Validar Sintaxe dos Scripts JavaScript (Painel)
+      - name: Validar Sintaxe dos Scripts JavaScript (Painel & CLI)
         run: |
-          echo "Verificando sintaxe de server.mjs e funções..."
+          echo "Verificando sintaxe de server.mjs, scripts CLI e funções..."
           node --check painel/server.mjs
+          node --check scripts/flow-cli.mjs
           find painel/functions -name "*.js" -exec node --check {} +
           echo "Todos os arquivos JavaScript são sintaticamente válidos."
 
       - name: Validar Arquivos JSON de Configuração
         run: |
-          python3 -c "
-          import json, sys
-          files = ['configuracao-cliente.json', 'painel/package.json', 'painel/public/manifest.webmanifest']
-          for f in files:
-              try:
-                  with open(f, 'r', encoding='utf-8') as fp:
-                      json.load(fp)
-                  print(f'OK: {f}')
-              except Exception as e:
-                  print(f'ERRO em {f}: {e}', file=sys.stderr)
-                  sys.exit(1)
+          node -e "
+          const fs = require('fs');
+          const files = ['package.json', 'configuracao-cliente.json', 'painel/package.json', 'painel/public/manifest.webmanifest'];
+          for (const f of files) {
+            try {
+              JSON.parse(fs.readFileSync(f, 'utf-8'));
+              console.log('OK: ' + f);
+            } catch (e) {
+              console.error('ERRO em ' + f + ':', e.message);
+              process.exit(1);
+            }
+          }
           "
+
+      - name: Executar Suite de Testes Automatizados (Node.js Test Runner)
+        run: |
+          echo "Executando testes unitários, de orquestração e de segurança..."
+          npm test
+          echo "Todos os testes automatizados passaram com sucesso!"
 
       - name: Compilar e Validar Scripts Python
         run: |
