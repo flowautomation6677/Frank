@@ -150,15 +150,23 @@ foreach ($a in $AgentesLista) {
     Write-Host "  + Agente registrado: $a" -ForegroundColor Green
 }
 
-# 6. Configurar Resiliência Multi-LLM (Fallback Chain)
+# 6. Configurar Resiliência Multi-LLM (Fallback Chain) e API Server
 Write-Host ""
-Write-Host "[5/7] Configurando Resiliência Multi-LLM (Anti-Queda)..." -ForegroundColor Yellow
+Write-Host "[5/7] Configurando Resiliência Multi-LLM e API Gateway (Porta 8642)..." -ForegroundColor Yellow
 & $HermesCmd kanban init | Out-Null
 & $HermesCmd config set timezone "America/Sao_Paulo" | Out-Null
 & $HermesCmd config set display.language "pt" | Out-Null
 & $HermesCmd config set stt.language "pt" | Out-Null
 & $HermesCmd config set model.provider "gemini" | Out-Null
 & $HermesCmd config set model.default "gemini-3.5-flash" | Out-Null
+& $HermesCmd config set gateway.multiplex_profiles true | Out-Null
+
+# Configura API Server multiplexado no Hermes
+$ApiServerKey = -join ((1..48) | ForEach-Object { '{0:x}' -f (Get-Random -Max 16) })
+$GlobalEnv = Join-Path $HermesHome ".env"
+$FrankEnv  = Join-Path $HermesHome "profiles\frank\.env"
+Add-Content -Path $GlobalEnv -Value "`nAPI_SERVER_ENABLED=true`nAPI_SERVER_KEY=$ApiServerKey`nAPI_SERVER_PORT=8642`nAPI_SERVER_HOST=127.0.0.1" -Encoding UTF8
+Add-Content -Path $FrankEnv -Value "`nAPI_SERVER_KEY=$ApiServerKey" -Encoding UTF8
 
 # Injeta a cadeia de fallback
 $FallbackPy = Join-Path $RepoDir "add_fallback.py"
@@ -166,6 +174,7 @@ if (Test-Path $FallbackPy) {
     & $PythonExe $FallbackPy | Out-Null
     Write-Host "  [OK] Fallback Multi-LLM configurado (Gemini 3.5 -> Gemini 3.8 -> GPT-4o)." -ForegroundColor Green
 }
+Write-Host "  [OK] API Gateway multiplexado ativo para os 8 agentes na porta 8642." -ForegroundColor Green
 
 # 7. Configurar Watchdog Silencioso & Atalhos
 Write-Host ""

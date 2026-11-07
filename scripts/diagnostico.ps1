@@ -40,16 +40,26 @@ if (Test-Path $HermesCmd) {
     $Problemas++
 }
 
-# Teste 3: Painel Web de Voz (Porta 8787)
-Write-Host "[3/6] Central Web / Painel de Voz..." -NoNewline
+# Teste 3: Central Web e API Gateway (Portas 8787 e 8642)
+Write-Host "[3/6] Central Web (8787) e Hermes API (8642)..." -NoNewline
+$p8787 = $false
+$p8642 = $false
 try {
     $saude = Invoke-RestMethod -Uri "http://127.0.0.1:8787/api/saude" -TimeoutSec 2 -ErrorAction Stop
-    if ($saude.servico -eq "painel-do-frank") {
-        Write-Host " [OK] Porta 8787 ativa e respondendo." -ForegroundColor Green
-    } else {
-        throw "Servico diferente"
-    }
-} catch {
+    if ($saude.servico -eq "painel-do-frank") { $p8787 = $true }
+} catch {}
+
+try {
+    $api = Invoke-RestMethod -Uri "http://127.0.0.1:8642/health" -TimeoutSec 2 -ErrorAction Stop
+    if ($api.status -eq "ok") { $p8642 = $true }
+} catch {}
+
+if ($p8787 -and $p8642) {
+    Write-Host " [OK] Painel (8787) e Hermes API (8642) 100% ativos." -ForegroundColor Green
+} elseif ($p8787) {
+    Write-Host " [AVISO] Painel de voz ativo, mas Hermes API (8642) inativo." -ForegroundColor Yellow
+    $Problemas++
+} else {
     Write-Host " [AVISO] Painel de voz fechado ou inativo." -ForegroundColor Yellow
     $Problemas++
 }
