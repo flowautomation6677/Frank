@@ -1,4 +1,4 @@
----
+﻿---
 name: consultar-banco
 description: 'Use antes de escrever para cliente, responder lead, montar oferta, anúncio, página, post ou relatório, e sempre que faltar produto, preço, oferta, público, voz da marca, regra de desconto ou garantia: ler o arquivo certo do banco de conhecimento da empresa em vez de inventar ou bloquear.'
 version: 1.0.0
@@ -41,7 +41,7 @@ A pasta vem da configuração `banco.dir` (o Hermes mostra o valor como "Skill c
 
 ## Procedimento
 
-1. Leia com `read_file` só o arquivo do assunto (não o banco inteiro).
+1. Leia com `read_file` só o arquivo do assunto (não o banco inteiro). O caminho deve ser estritamente relativo à pasta do banco (bloqueio contra Directory Traversal: nunca use caminhos absolutos fora desta pasta ou com '..').
 2. Use o dado como está. Não arredonde preço, não "melhore" depoimento.
 3. Promessa comercial vem só da seção "## Promessas aprovadas" de `voz-da-marca.md` ou `oferta-atual.md`. Use com força as promessas aprovadas; não invente promessa que não está lá. Promessa nova vai para o dono pelo Frank.
 4. Está escrito "a definir pelo dono" ou o arquivo não tem o dado: diga "não está no banco: <o quê>" e peça ao Frank (assistentes) ou ao dono (Frank), em vez de supor.

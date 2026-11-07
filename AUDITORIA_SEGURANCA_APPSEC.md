@@ -54,3 +54,4 @@ No script `scripts/instalar-cliente.ps1`:
 
 *Documento auditado pela engenharia da Flow Automation.*  
 *Responsável Técnico: Luiz Antonio*
+
