@@ -16,10 +16,15 @@
       { "provider": "openai-api", "model": "gpt-4o" }
     ]
   },
-  "chaves_de_acesso": {
-    "gemini_api_key": "COLOQUE_SUA_CHAVE_AQUI",
-    "openai_api_key": "COLOQUE_SUA_CHAVE_AQUI_SE_TIVER",
-    "telegram_bot_token": "COLOQUE_SEU_TOKEN_DO_BOTFATHER_AQUI"
+  "seguranca_e_segredos": {
+    "gerenciamento": "Cofre Centralizado de Segredos (AES-256-GCM)",
+    "aviso": "Por diretriz de AppSec (OWASP), as chaves de API não devem ser gravadas em texto plano neste arquivo. Utilize o cofre seguro via comando 'npm run cofre definir <CHAVE> <VALOR>' ou variáveis de ambiente.",
+    "chaves_suportadas": [
+      "GEMINI_API_KEY",
+      "OPENAI_API_KEY",
+      "TELEGRAM_BOT_TOKEN",
+      "HERMES_API_KEY",
+      "FRANK_ACCESS_CODE"
+    ]
   }
 }
-

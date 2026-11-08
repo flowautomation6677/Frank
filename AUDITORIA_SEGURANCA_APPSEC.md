@@ -23,6 +23,7 @@ Todas as recomendações de segurança foram implementadas diretamente no códig
 | **Controle de Acesso e IDOR / BOLA (Módulo API / Painel)** | CWE-285 / OWASP API1:2023 | **Alto (8.5)** | 1. **Validação Composta de Posse:** Nas rotas `demandas/[id]` e `turno/[runId]/aprovacao`, a API valida se o recurso pertence estritamente ao `nomeDoDono` configurado.<br/>2. Validação estrita por Regex (`ID_DA_DEMANDA`, `ID_DO_RUN`) impedindo enumeração e injeções.<br/>3. Proteção contra CSRF/Cross-Site Leaks via `Sec-Fetch-Site` e validação de `Origin`. | **BLINDADO** |
 | **Integração LLM, SSRF e Prompt Injection** | CWE-94 / OWASP LLM01, LLM08 & SSRF | **Alto (8.2)** | 1. **Validador de SSRF em `http.js`:** Bloqueio estrito de endpoints de metadados de nuvem (`169.254.169.254`, `metadata.google.internal`) e redes privadas.<br/>2. **Delimitadores Fortes nos Agentes:** Instruções em `SOUL.md` tratam textos dentro de `<user_input>` estritamente como dados inertes.<br/>3. **Human-In-The-Loop (HITL):** O subsistema `autorizacao.js` impõe aprovação humana para qualquer comando destrutivo. | **BLINDADO** |
 | **Escalação de Privilégios (LPE / Hijacking no Windows)** | CWE-78 / OWASP A08:2021 | **Alto (7.8)** | 1. **Zero-UAC:** O watchdog roda nos limites do usuário comum (`%LOCALAPPDATA%`), sem rodar como `SYSTEM`.<br/>2. O instalador aplica ACLs estritas no Windows via `icacls`, garantindo que apenas o usuário proprietário tenha permissão de gravação nos scripts. | **BLINDADO** |
+| **Vazamento e Fragmentação de Segredos (Secrets Exposure)** | CWE-798 / OWASP A02:2021 | **Alto (8.1)** | 1. **Cofre Centralizado de Segredos:** Cifragem autenticada em repouso com **AES-256-GCM** e derivação PBKDF2 (100.000 iterações).<br/>2. Injeção estritamente em memória em tempo de execução.<br/>3. Mascaramento automático (`mascararChave`, `omitirSegredos`) contra logs e stack traces. | **BLINDADO** |
 
 ---
 
@@ -60,6 +61,13 @@ No script `scripts/instalar-cliente.ps1`:
   ```powershell
   icacls "$PastaFrank" /inheritance:r /grant:r "$($env:USERNAME):(OI)(CI)F" /grant:r "SYSTEM:(OI)(CI)F"
   ```
+
+### Camada 5: Centralização e Cofre de Segredos Criptografado (AES-256-GCM / OWASP A02:2021)
+No arquivo `painel/functions/_lib/cofre.js`:
+- Todas as chaves de API (Gemini Live, OpenAI, Telegram Bot, Hermes) são armazenadas em cofre criptografado com **AES-256-GCM**, autenticado com Auth Tag de 128 bits e chave derivada por PBKDF2 (SHA-256, 100.000 iterações).
+- Os segredos são injetados **estritamente em memória em tempo de execução** (`obterCofre().injetarNoAmbiente()`), eliminando chaves em texto claro em arquivos JSON ou repositórios.
+- Qualquer tentativa de adulteração de integridade no cofre é detectada e abortada criptograficamente.
+- Funções de ofuscação (`mascararChave`, `omitirSegredos`) garantem que chaves sensíveis nunca sejam emitidas em respostas HTTP, logs de console ou stack traces.
 
 ---
 

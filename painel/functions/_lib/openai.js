@@ -2,6 +2,7 @@
 import config from '../../config/frank.js';
 import { ErroHttp, chamarFornecedor, lerCorpoJson, lerJsonDoFornecedor, responderJson } from './http.js';
 import { cumprimentoDoMomento, empresaDoDono, momentoDaConversa, montarSessaoLive, nomeDoDono, normalizarNome } from './frank.js';
+import { obterSegredo } from './cofre.js';
 
 export const MOTIVO_SEM_OPENAI = 'Adicione OPENAI_API_KEY no .env para ligar o GPT Live.';
 
@@ -9,8 +10,9 @@ const URL_DA_SESSAO = 'https://api.openai.com/v1/live/sessions';
 const LIMITE_DO_SDP = 20000;
 
 function chaveDaOpenai(env) {
-  if (!env.OPENAI_API_KEY) throw new ErroHttp(503, MOTIVO_SEM_OPENAI);
-  return env.OPENAI_API_KEY;
+  const chave = obterSegredo('OPENAI_API_KEY', env);
+  if (!chave) throw new ErroHttp(503, MOTIVO_SEM_OPENAI);
+  return chave;
 }
 
 function cabecalhosOpenai(chave) {

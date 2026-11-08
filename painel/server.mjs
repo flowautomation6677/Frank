@@ -16,6 +16,7 @@ import { retomarAcompanhamentos } from './functions/_lib/acompanhamento.js';
 import { empresaDoDono, nomeDoDono } from './functions/_lib/frank.js';
 import { vozDoEnv, vozPadraoDoGemini } from './functions/_lib/gemini.js';
 import { binarioDoHermes, sondarQuadro } from './functions/_lib/quadro.js';
+import { obterCofre } from './functions/_lib/cofre.js';
 
 const RAIZ = path.dirname(fileURLToPath(import.meta.url));
 const PASTA_PUBLICA = path.join(RAIZ, 'public');
@@ -258,6 +259,8 @@ for (const nome of VARIAVEIS_REPASSADAS) {
 // Só o servidor define a pasta de dados: é ela que libera as rotas /api/frank/*. Caminho relativo parte desta pasta.
 const pastaDeDados = variavel('FRANK_PASTA_DE_DADOS');
 env.FRANK_PASTA_DE_DADOS = pastaDeDados ? path.resolve(RAIZ, pastaDeDados) : path.join(RAIZ, 'data');
+// Injeta com segurança segredos do cofre criptografado em memória em tempo de execução
+obterCofre({ env }).injetarNoAmbiente(env);
 const host = variavel('FRANK_HOST') || HOST_PADRAO;
 const porta = lerPorta(variavel('FRANK_PORTA'));
 const servidor = criarServidor(env);

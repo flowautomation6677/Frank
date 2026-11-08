@@ -16,6 +16,8 @@
     "db:status": "node scripts/flow-cli.mjs db status",
     "db:migrar": "node scripts/flow-cli.mjs db migrar",
     "db:seed": "node scripts/flow-cli.mjs db seed",
+    "cofre": "node scripts/flow-cli.mjs cofre",
+    "cofre:status": "node scripts/flow-cli.mjs cofre status",
     "start": "node painel/server.mjs"
   }
 }

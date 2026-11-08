@@ -2,6 +2,7 @@
 import config from '../../config/frank.js';
 import { ErroHttp, chamarFornecedor, lerCorpoJson, lerJsonDoFornecedor, responderJson } from './http.js';
 import { cumprimentoDoMomento, empresaDoDono, momentoDaConversa, montarSessaoGemini, nomeDoDono, normalizarNome } from './frank.js';
+import { obterSegredo } from './cofre.js';
 
 // O aluno não mexe no .env: quem grava as chaves é o instalador, e o comando time-do-frank troca.
 export const MOTIVO_SEM_GEMINI = 'Falta a chave da voz. No terminal da VPS, rode: time-do-frank voz';
@@ -25,8 +26,9 @@ export function vozPadraoDoGemini(env) {
 }
 
 function chaveDoGemini(env) {
-  if (!env.GEMINI_API_KEY) throw new ErroHttp(503, MOTIVO_SEM_GEMINI);
-  return env.GEMINI_API_KEY;
+  const chave = obterSegredo('GEMINI_API_KEY', env);
+  if (!chave) throw new ErroHttp(503, MOTIVO_SEM_GEMINI);
+  return chave;
 }
 
 function lerNome(valor) {

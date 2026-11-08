@@ -13,6 +13,8 @@
     "banco": "node ../scripts/flow-cli.mjs banco",
     "fallback": "node ../scripts/flow-cli.mjs fallback",
     "db:status": "node ../scripts/flow-cli.mjs db status",
-    "db:migrar": "node ../scripts/flow-cli.mjs db migrar"
+    "db:migrar": "node ../scripts/flow-cli.mjs db migrar",
+    "cofre": "node ../scripts/flow-cli.mjs cofre",
+    "cofre:status": "node ../scripts/flow-cli.mjs cofre status"
   }
 }

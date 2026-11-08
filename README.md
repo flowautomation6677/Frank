@@ -96,7 +96,13 @@ npm run db:status
 npm run db:migrar
 npm run db:seed
 
-# 6. Menu de ajuda interativo
+# 6. Cofre Centralizado de Segredos (AES-256-GCM)
+npm run cofre:status
+node scripts/flow-cli.mjs cofre definir GEMINI_API_KEY <sua-chave>
+node scripts/flow-cli.mjs cofre definir OPENAI_API_KEY <sua-chave>
+node scripts/flow-cli.mjs cofre definir TELEGRAM_BOT_TOKEN <seu-token>
+
+# 7. Menu de ajuda interativo
 npm run cli ajuda
 ```
 
@@ -126,7 +132,7 @@ Diferente da arquitetura legada baseada unicamente em pastas e arquivos Markdown
 
 ## ⚙️ Pipelines de CI/CD & Auditoria de Segurança
 O repositório possui fluxos automatizados do GitHub Actions em `.github/workflows/`:
-- **Suite de Testes Automatizados**: Execução contínua de 43 testes unitários e de integração em Node.js 22 LTS.
+- **Suite de Testes Automatizados**: Execução contínua de 50 testes unitários e de integração em Node.js 22 LTS.
 - **Validação de Sintaxe**: Checagem de JavaScript (Node 22), Python 3.11 e JSONs.
 - **Auditoria AppSec**: Varredura contra chaves de API expostas, conferência de hashes SHA-256 de Supply Chain e conformidade OWASP LLM.
 - **Docker Build Validation**: Garantia de integridade do contêiner a cada commit.

@@ -2,6 +2,7 @@
 import { ErroHttp, omitirSegredos } from './http.js';
 import { IDS_DO_TIME } from './frank.js';
 import { descricaoEmPortugues } from './descricoes-do-hermes.js';
+import { obterSegredo } from './cofre.js';
 
 export const MOTIVO_SO_LOCAL = 'O Frank precisa do Hermes, que só roda no servidor local.';
 // O comando time-do-frank voz regrava o .env do painel com a API do Frank (HERMES_API_URL e HERMES_API_KEY).
@@ -26,14 +27,15 @@ const RUN_ESQUECIDO = { status: 404, mensagem: 'O Hermes não conhece mais este 
 // FRANK_PASTA_DE_DADOS só existe quando o server.mjs monta o env.
 export function exigirHermes(env) {
   if (!env.FRANK_PASTA_DE_DADOS) throw new ErroHttp(503, MOTIVO_SO_LOCAL);
-  if (!env.HERMES_API_URL || !env.HERMES_API_KEY) throw new ErroHttp(503, MOTIVO_SEM_HERMES);
+  const chave = obterSegredo('HERMES_API_KEY', env) || env.HERMES_API_KEY;
+  if (!env.HERMES_API_URL || !chave) throw new ErroHttp(503, MOTIVO_SEM_HERMES);
   let origem;
   try {
     origem = new URL(env.HERMES_API_URL).origin;
   } catch (erro) {
     throw new ErroHttp(503, 'HERMES_API_URL no .env não é um endereço válido.', undefined, { cause: erro });
   }
-  return { base: env.HERMES_API_URL.replace(/\/+$/, ''), origem, chave: env.HERMES_API_KEY };
+  return { base: env.HERMES_API_URL.replace(/\/+$/, ''), origem, chave };
 }
 
 // recusas: status do Hermes → { status, mensagem } que a rota devolve no lugar do 502 genérico.
