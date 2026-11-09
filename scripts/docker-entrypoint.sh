@@ -144,10 +144,10 @@ cleanup() {
 }
 trap cleanup SIGTERM SIGINT
 
-# Iniciar Hermes Gateway em segundo plano
+# Iniciar Hermes Gateway em segundo plano (apenas o perfil frank escuta Telegram)
 if [ -x "$HERMES_BIN" ]; then
   echo "-> Iniciando Hermes Gateway na porta 8642..."
-  $HERMES_BIN gateway run &
+  (unset TELEGRAM_BOT_TOKEN TELEGRAM_ALLOWED_USERS TELEGRAM_HOME_CHANNEL; $HERMES_BIN gateway run) &
   PID_HERMES=$!
 else
   echo "Aviso: Binário do Hermes não encontrado em $HERMES_BIN. Rodando apenas Painel Web."
