@@ -4,9 +4,10 @@
 // Demandas do Frank em FRANK_PASTA_DE_DADOS (padrão data/, nesta pasta). Atrás de proxy HTTPS, FRANK_ORIGEM_PUBLICA
 // (https://frank.exemplo.com) libera esse host; as funções veem a origem pública, que é a do navegador.
 import http from 'node:http';
-import { createReadStream } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -249,7 +250,20 @@ function criarServidor(env) {
   });
 }
 
-const arquivoEnv = process.env.FRANK_ENV_FILE ? path.resolve(process.env.FRANK_ENV_FILE) : path.join(RAIZ, '.env');
+function resolverArquivoEnv() {
+  if (process.env.FRANK_ENV_FILE) return path.resolve(process.env.FRANK_ENV_FILE);
+  const caminhosCandidatos = [
+    path.join(RAIZ, '.env'),
+    path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'TimeDoFrank', 'painel', 'painel.env'),
+    path.join(path.resolve(RAIZ, '..'), '.env'),
+  ];
+  for (const c of caminhosCandidatos) {
+    if (existsSync(c)) return c;
+  }
+  return path.join(RAIZ, '.env');
+}
+
+const arquivoEnv = resolverArquivoEnv();
 const variavel = await carregarAmbiente(arquivoEnv);
 const env = {};
 for (const nome of VARIAVEIS_REPASSADAS) {
