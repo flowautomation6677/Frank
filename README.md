@@ -28,12 +28,15 @@ Cada agente possui persona, tom de voz, habilidades (`skills`) e escopo bem defi
 ```
 Flow Automation (Frank)
 ├── agentes/                # Definições dos 8 agentes (SOUL.md, skills, config.yaml)
+├── docs/                   # Documentação Técnica, Operacional, POPs e BPMN
 ├── painel/                 # Servidor do painel de voz Web local (Node.js)
 ├── scripts/                # Scripts automatizados de instalação e deploy
 │   └── instalar-cliente.ps1
 ├── ~/empresa/banco/        # Base de conhecimento compartilhada da empresa (.md)
 └── %LOCALAPPDATA%/hermes/  # Motor de orquestração de IA e perfis
 ```
+
+> 📚 **Documentação Técnica, POPs & BPMN:** Consulte [docs/DOCUMENTACAO_TECNICA_OPERACIONAL.md](docs/DOCUMENTACAO_TECNICA_OPERACIONAL.md) para o mapeamento completo de arquitetura, perfis, POPs operacionais e modelagem de processos.
 
 ---
 
