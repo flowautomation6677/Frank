@@ -25,6 +25,7 @@ services:
       - FRANK_NOME_DO_DONO=${FRANK_NOME_DO_DONO:-Luiz Antonio}
       - FRANK_NOME_DA_EMPRESA=${FRANK_NOME_DA_EMPRESA:-Flow Automation}
       - FRANK_ACCESS_CODE=${FRANK_ACCESS_CODE:-}
+      - FRANK_ORIGEM_PUBLICA=${FRANK_ORIGEM_PUBLICA:-}
     volumes:
       - frank_data:/app/data
       - hermes_home:/home/hermes/.hermes
