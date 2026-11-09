@@ -24,6 +24,8 @@ setup_flow_automation.py
 teste_codigo.js
 parse_page.js
 *.html
+!painel/public/**/*.html
+!painel/public/*.html
 *.tar.gz
 
 # Node.js e Python

@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="escuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel do Frank</title>
+<meta name="description" content="Painel de voz do Frank e do time de 7 assistentes de IA, ligado ao Hermes.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121110'/%3E%3Cpath d='M22 16h22v8H31v6h11v8H31v10h-9z' fill='%23FF6B1A'/%3E%3C/svg%3E">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icones/frank-180.png">
+<meta name="theme-color" content="#121110">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,600..900&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="img/ag-frank.webp">
+<link rel="stylesheet" href="css/frank.css">
+<script>
+  try {
+    var salvas = JSON.parse(localStorage.getItem('painel-do-frank:preferencias') || '{}');
+    if (salvas.tema === 'claro') document.documentElement.dataset.tema = 'claro';
+  } catch (erro) {
+    /* storage bloqueado (janela privada): o tema escuro padrão continua */
+  }
+</script>
+<script type="module" src="js/app.js"></script>
+</head>
+<body data-sessao="espera" data-falando="nao" data-mudo="nao">
+<a class="pular" href="#bandeja">Ir para as entregas a aprovar</a>
+
+<header class="barra">
+  <div class="marca">
+    <h1 class="marca-nome">Frank</h1>
+    <div class="relogio">
+      <svg class="relogio-icone" id="relogio-icone" viewBox="0 0 24 24" aria-hidden="true">
+        <circle class="relogio-aro" cx="12" cy="12" r="10.4"/>
+        <path class="relogio-marcas" d="M12 3.3v1.5M20.7 12h-1.5M12 20.7v-1.5M3.3 12h1.5"/>
+        <line class="relogio-ponteiro relogio-ponteiro-hora" id="ponteiro-hora" x1="12" y1="12" x2="12" y2="7.6"/>
+        <line class="relogio-ponteiro relogio-ponteiro-minuto" id="ponteiro-minuto" x1="12" y1="12" x2="12" y2="5"/>
+        <line class="relogio-ponteiro relogio-ponteiro-segundo" id="ponteiro-segundo" x1="12" y1="14.2" x2="12" y2="4.4"/>
+        <circle class="relogio-eixo" cx="12" cy="12" r="1.2"/>
+      </svg>
+      <p class="relogio-texto">
+        <span class="relogio-linha"><time class="relogio-hora" id="relogio-hora">--:--</time><span class="relogio-seg" id="relogio-seg" aria-hidden="true">:--</span></span>
+        <span class="relogio-data" id="relogio-data"></span>
+      </p>
+    </div>
+  </div>
+
+  <div class="barra-controles">
+    <div class="demanda">
+      <button type="button" class="demanda-botao" id="demanda-botao" popovertarget="demandas" aria-expanded="false" aria-controls="demandas">
+        <span class="demanda-rotulo">Demanda</span>
+        <span class="demanda-titulo" id="demanda-titulo">Nova demanda</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+      </button>
+    </div>
+
+    <fieldset class="seletor" id="seletor-motor" hidden>
+      <legend class="sr">Motor de voz da conversa</legend>
+      <label class="seletor-opcao">
+        <input type="radio" name="motor" value="geminiLive">
+        <span class="seletor-ponto" aria-hidden="true"></span>
+        <span>Gemini</span>
+      </label>
+      <label class="seletor-opcao">
+        <input type="radio" name="motor" value="gptLive">
+        <span class="seletor-ponto" aria-hidden="true"></span>
+        <span>GPT Live</span>
+      </label>
+    </fieldset>
+  </div>
+
+  <p class="custo" aria-live="off">
+    <span class="custo-rotulo">Custo da voz</span>
+    <output class="custo-valor" id="custo-valor">US$ 0,00</output>
+    <span class="custo-tipo" id="custo-tipo" title="O cérebro do Frank roda no Hermes, com a sua assinatura.">cérebro: assinatura</span>
+  </p>
+
+  <button type="button" class="botao-mic" id="botao-mic">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+    <span id="botao-mic-texto">Acordar</span>
+  </button>
+  <button type="button" class="botao-icone" id="botao-config" aria-haspopup="dialog" aria-label="Configurações">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+  </button>
+  <button type="button" class="botao-icone" id="botao-ajuda" aria-haspopup="dialog" aria-label="Atalhos de teclado">
+    <span aria-hidden="true">?</span>
+  </button>
+</header>
+
+<main class="painel" id="painel">
+  <section class="palco" id="palco" aria-label="Frank e o time">
+    <div class="nucleo-area" id="nucleo-area">
+      <canvas class="hud" id="hud" aria-hidden="true"></canvas>
+      <button type="button" class="nucleo" id="nucleo" aria-label="Acordar o Frank">
+        <img src="img/ag-frank.webp" alt="" width="432" height="432">
+      </button>
+      <p class="estado-frank" id="estado-frank"><span id="estado-texto">Em espera. Toque no núcleo ou aperte Espaço para acordar.</span><span class="estado-cerebro" id="estado-cerebro" title="Cérebro do Frank no Hermes, na sua assinatura" hidden></span></p>
+      <div class="toque" id="toque" hidden>
+        <button type="button" class="toque-botao" id="toque-botao">Toque para acordar</button>
+        <p>O navegador pediu um clique antes de liberar o som.</p>
+      </div>
+    </div>
+
+    <ul class="time" id="time" aria-label="Time de assistentes"></ul>
+
+    <div class="legendas" id="legendas" aria-live="polite">
+      <p class="legenda legenda-frank" data-vazia="sim"><span class="legenda-quem">Frank</span> <span class="legenda-texto" id="legenda-frank"></span></p>
+      <p class="legenda legenda-usuario" data-vazia="sim"><span class="legenda-quem">Você</span> <span class="legenda-texto" id="legenda-usuario"></span></p>
+    </div>
+  </section>
+
+  <div class="trilho" id="trilho">
+    <section class="autorizacao" id="autorizacao" aria-labelledby="titulo-autorizacao" data-fase="fechado" hidden>
+      <img class="autorizacao-retrato" src="img/ag-frank.webp" alt="" width="38" height="38">
+      <div class="autorizacao-corpo">
+        <div class="autorizacao-pedido" data-campo="pedido">
+          <h2 class="autorizacao-titulo" id="titulo-autorizacao" tabindex="-1">O Frank precisa da sua autorização</h2>
+          <p class="autorizacao-descricao" data-campo="descricao"></p>
+          <pre class="autorizacao-comando" data-campo="caixa-comando"><code data-campo="comando"></code></pre>
+          <div class="autorizacao-acoes">
+            <button type="button" class="botao botao-primario botao-pequeno" data-campo="sim">Autorizar</button>
+            <button type="button" class="botao botao-pequeno" data-campo="nao">Não autorizar</button>
+          </div>
+          <p class="autorizacao-erro" data-campo="erro" role="alert" hidden></p>
+          <p class="autorizacao-nota">Pode responder por voz também: sim ou não.</p>
+          <p class="autorizacao-fila" data-campo="fila" hidden></p>
+        </div>
+        <p class="autorizacao-aviso" data-campo="aviso" hidden></p>
+      </div>
+    </section>
+
+    <section class="bandeja" id="bandeja" aria-labelledby="titulo-bandeja">
+      <h2 class="trilho-titulo" id="titulo-bandeja" tabindex="-1">Para aprovar <span class="contagem" id="contagem">0</span></h2>
+      <ul class="bandeja-lista" id="bandeja-lista"></ul>
+      <p class="bandeja-vazia" id="bandeja-vazia">Nada esperando por você. Quando alguém do time terminar, a entrega aparece aqui.</p>
+    </section>
+
+    <section class="registro" aria-labelledby="titulo-registro">
+      <h2 class="trilho-titulo" id="titulo-registro">Registro</h2>
+      <ol class="registro-lista" id="registro-lista"></ol>
+    </section>
+  </div>
+</main>
+
+<p class="selo">Nada é apagado sem a sua autorização</p>
+<div class="sr" role="status" id="anuncio"></div>
+
+<dialog class="dialogo" id="dialogo-config" aria-labelledby="titulo-config">
+  <form method="dialog" class="dialogo-corpo" id="form-config">
+    <div class="dialogo-topo">
+      <h2 id="titulo-config">Configurações</h2>
+      <button class="botao botao-pequeno" value="fechar">Fechar</button>
+    </div>
+
+    <label class="campo">
+      <span>Seu nome</span>
+      <input type="text" name="nome" id="cfg-nome" autocomplete="given-name" maxlength="40">
+      <small>O Frank usa esse nome na saudação.</small>
+    </label>
+
+    <fieldset class="campo cerebro" id="cfg-cerebro">
+      <legend>Cérebro do Frank</legend>
+      <div class="cerebro-campos">
+        <label class="cerebro-campo">
+          <span>Provedor</span>
+          <select name="provedor" id="cfg-provedor"></select>
+        </label>
+        <label class="cerebro-campo">
+          <span>Modelo</span>
+          <select name="modelo" id="cfg-modelo"></select>
+        </label>
+        <label class="cerebro-campo">
+          <span>Esforço</span>
+          <select name="esforco" id="cfg-esforco"></select>
+        </label>
+      </div>
+      <label class="campo-linha cerebro-fast">
+        <input type="checkbox" name="fast" id="cfg-fast" disabled>
+        <span>Modo fast <small id="cfg-fast-nota">Responde mais rápido no primeiro minuto de cada pedido e gasta mais.</small></span>
+      </label>
+      <div class="cerebro-rodape">
+        <small id="cfg-cerebro-nota">Lendo os modelos do Hermes…</small>
+        <button type="button" class="botao botao-pequeno" id="cfg-cerebro-padrao" hidden>Usar o padrão</button>
+      </div>
+    </fieldset>
+
+    <label class="campo">
+      <span>Voz do Frank na conversa (Gemini Live)</span>
+      <select name="vozGemini" id="cfg-voz-gemini"></select>
+      <small id="cfg-voz-gemini-nota"></small>
+    </label>
+
+    <label class="campo" id="cfg-voz-gpt-campo" hidden>
+      <span>Voz do Frank na conversa (GPT Live)</span>
+      <select name="vozGptLive" id="cfg-voz-gpt"></select>
+      <small id="cfg-voz-gpt-nota"></small>
+    </label>
+
+    <div class="campo">
+      <label class="campo-linha">
+        <input type="checkbox" name="acordarAoChamar" id="cfg-chamar" aria-describedby="cfg-chamar-nota">
+        <span>Acordar quando eu chamar o Frank</span>
+      </label>
+      <small id="cfg-chamar-nota">O reconhecimento do Chrome ouve enquanto a voz dorme e manda o áudio para o Google, sem custo.</small>
+    </div>
+
+    <label class="campo campo-linha">
+      <input type="checkbox" name="acordarAoAbrir" id="cfg-acordar">
+      <span>Acordar ao abrir, quando o microfone já estiver liberado</span>
+    </label>
+
+    <label class="campo">
+      <span>Espera automática depois de quantos segundos sem fala</span>
+      <input type="number" name="esperaSegundos" id="cfg-espera" min="15" max="1800" step="5" inputmode="numeric">
+      <small>A voz dorme depois da última fala, sua ou do Frank, para não pagar tempo parado. Com o time trabalhando ela dorme também e acorda quando ele terminar.</small>
+    </label>
+
+    <fieldset class="campo">
+      <legend>Tema</legend>
+      <div class="campo-opcoes">
+        <label class="campo-linha"><input type="radio" name="tema" value="escuro"> Escuro</label>
+        <label class="campo-linha"><input type="radio" name="tema" value="claro"> Claro</label>
+      </div>
+    </fieldset>
+
+    <label class="campo" id="cfg-codigo-campo" hidden>
+      <span>Código de acesso do servidor</span>
+      <input type="password" name="codigo" id="cfg-codigo" autocomplete="off">
+    </label>
+  </form>
+</dialog>
+
+<dialog class="dialogo dialogo-pequeno" id="dialogo-codigo" aria-labelledby="titulo-codigo">
+  <form method="dialog" class="dialogo-corpo" id="form-codigo">
+    <h2 id="titulo-codigo">Código de acesso</h2>
+    <p>Este servidor pede um código antes de ligar o Frank. Ele fica salvo neste navegador.</p>
+    <label class="campo">
+      <span>Código</span>
+      <input type="password" name="codigo" id="codigo-entrada" autocomplete="off" required>
+    </label>
+    <div class="dialogo-acoes">
+      <button class="botao" value="cancelar" formnovalidate>Cancelar</button>
+      <button class="botao botao-primario" value="entrar">Entrar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="dialogo dialogo-entrega" id="dialogo-entrega" aria-labelledby="entrega-tarefa">
+  <div class="dialogo-corpo">
+    <div class="entrega-topo">
+      <span class="entrega-retrato"><img data-campo="retrato" src="img/ag-frank.webp" alt="" width="64" height="64"></span>
+      <div class="entrega-quem">
+        <p class="entrega-agente" data-campo="agente"></p>
+        <p class="entrega-funcao" data-campo="funcao"></p>
+      </div>
+      <button type="button" class="botao botao-pequeno" data-campo="fechar">Fechar</button>
+    </div>
+    <p class="entrega-meta">entregue às <time data-campo="hora"></time><span data-campo="duracao"></span></p>
+    <div class="entrega-bloco">
+      <p class="entrega-rotulo">Tarefa</p>
+      <h2 class="entrega-tarefa" id="entrega-tarefa" data-campo="tarefa"></h2>
+    </div>
+    <div class="entrega-bloco">
+      <p class="entrega-rotulo">Entrega</p>
+      <p class="entrega-texto" data-campo="entrega"></p>
+      <p class="entrega-arquivo" data-campo="arquivo" hidden></p>
+    </div>
+    <form class="pendencia-ajuste entrega-ajuste" data-campo="ajuste" hidden>
+      <input type="text" name="observacao" maxlength="200" placeholder="O que mudar?" aria-label="O que ajustar nesta entrega" required>
+      <button type="submit" class="botao botao-pequeno">Enviar ajuste</button>
+    </form>
+    <div class="dialogo-acoes">
+      <button type="button" class="botao botao-discreto" data-campo="descartar">Descartar</button>
+      <button type="button" class="botao" data-campo="pedir-ajuste" aria-expanded="false">Pedir ajuste</button>
+      <button type="button" class="botao botao-primario" data-campo="aprovar">Aprovar</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="dialogo dialogo-pequeno" id="dialogo-ajuda" aria-labelledby="titulo-ajuda">
+  <form method="dialog" class="dialogo-corpo">
+    <div class="dialogo-topo">
+      <h2 id="titulo-ajuda">Atalhos</h2>
+      <button class="botao botao-pequeno" value="fechar">Fechar</button>
+    </div>
+    <dl class="atalhos">
+      <dt><kbd>Espaço</kbd></dt><dd>Acorda o Frank. Com a sessão ligada, silencia ou reativa o microfone.</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Encerra a sessão.</dd>
+      <dt><kbd>?</kbd></dt><dd>Mostra estes atalhos.</dd>
+    </dl>
+  </form>
+</dialog>
+
+<div class="demandas" id="demandas" popover aria-labelledby="titulo-demandas">
+  <div class="demandas-topo">
+    <h2 id="titulo-demandas">Demandas</h2>
+    <button type="button" class="botao botao-pequeno botao-primario" id="demanda-nova">Nova demanda</button>
+  </div>
+  <p class="demandas-nota" id="demandas-nota" role="status"></p>
+  <ul class="demandas-lista" id="demandas-lista"></ul>
+</div>
+</body>
+</html>
