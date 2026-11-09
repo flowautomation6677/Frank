@@ -74,7 +74,7 @@ EOF
 
 export FRANK_ENV_FILE="/app/painel/painel.env"
 
-echo "[1/3] Verificando configuração do motor Hermes..."
+echo "[1/3] Verificando configuração do motor Hermes e registrando agentes..."
 if [ -x "$HERMES_BIN" ]; then
   $HERMES_BIN kanban init 2>/dev/null || true
   $HERMES_BIN config set timezone "America/Sao_Paulo" 2>/dev/null || true
@@ -83,12 +83,42 @@ if [ -x "$HERMES_BIN" ]; then
   $HERMES_BIN config set model.provider "gemini" 2>/dev/null || true
   $HERMES_BIN config set model.default "gemini-3.5-flash" 2>/dev/null || true
   $HERMES_BIN config set gateway.multiplex_profiles true 2>/dev/null || true
+
+  # Registrar agentes do time
+  for a in frank renata breno marina lara vitor ulisses isabela; do
+    if [ -d "$APP_DIR/agentes/$a" ]; then
+      if [ ! -d "$HERMES_HOME/profiles/$a" ] || [ ! -f "$HERMES_HOME/profiles/$a/SOUL.md" ]; then
+        echo "  + Registrando perfil do agente: $a"
+        $HERMES_BIN profile install "$APP_DIR/agentes/$a" --yes 2>/dev/null || true
+        if [ -f "$APP_DIR/agentes/$a/DESCRICAO.txt" ]; then
+          $HERMES_BIN profile describe "$a" --text "$(cat "$APP_DIR/agentes/$a/DESCRICAO.txt")" 2>/dev/null || true
+        fi
+      fi
+      mkdir -p "$HERMES_HOME/profiles/$a"
+      cat > "$HERMES_HOME/profiles/$a/.env" <<EOF
+API_SERVER_KEY=$HERMES_API_KEY
+OPENAI_API_KEY=${OPENAI_API_KEY:-}
+GEMINI_API_KEY=${GEMINI_API_KEY:-}
+GOOGLE_API_KEY=${GEMINI_API_KEY:-}
+TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
+TELEGRAM_HOME_CHANNEL=${TELEGRAM_HOME_CHANNEL:-}
+EOF
+    fi
+  done
 fi
 
 # Inicializar Base de Conhecimento se vazia
 if [ ! -f "$BANCO_DIR/empresa.md" ] && [ -f "$APP_DIR/agentes/frank/skills/onboarding-da-empresa/scripts/preparar_banco.py" ]; then
   echo "[2/3] Semeando Base de Conhecimento em $BANCO_DIR..."
   python3 "$APP_DIR/agentes/frank/skills/onboarding-da-empresa/scripts/preparar_banco.py" criar --banco "$BANCO_DIR" 2>/dev/null || true
+fi
+
+# Inicializar Banco SQLite Estruturado e Catálogo de Agentes
+if [ -f "$APP_DIR/scripts/flow-cli.mjs" ]; then
+  echo "-> Inicializando banco SQLite estruturado e migrações ORM..."
+  node "$APP_DIR/scripts/flow-cli.mjs" db migrar 2>/dev/null || true
+  node "$APP_DIR/scripts/flow-cli.mjs" db seed 2>/dev/null || true
 fi
 
 echo "[3/3] Iniciando serviços..."

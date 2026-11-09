@@ -58,6 +58,7 @@ RUN mkdir -p /app/data /app/painel /app/agentes /app/scripts /home/hermes/empres
     chown -R hermes:hermes /app /home/hermes
 
 # Copiar código da aplicação
+COPY --chown=hermes:hermes package.json /app/package.json
 COPY --chown=hermes:hermes agentes/ /app/agentes/
 COPY --chown=hermes:hermes painel/ /app/painel/
 COPY --chown=hermes:hermes scripts/ /app/scripts/
