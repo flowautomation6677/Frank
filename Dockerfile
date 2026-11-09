@@ -28,6 +28,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
     sqlite3 \
     procps \
+    libatomic1 \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar Node.js do estágio 1
