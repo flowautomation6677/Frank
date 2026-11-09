@@ -96,7 +96,8 @@ if [ -x "$HERMES_BIN" ]; then
         fi
       fi
       mkdir -p "$HERMES_HOME/profiles/$a"
-      cat > "$HERMES_HOME/profiles/$a/.env" <<EOF
+      if [ "$a" = "frank" ]; then
+        cat > "$HERMES_HOME/profiles/$a/.env" <<EOF
 API_SERVER_KEY=$HERMES_API_KEY
 OPENAI_API_KEY=${OPENAI_API_KEY:-}
 GEMINI_API_KEY=${GEMINI_API_KEY:-}
@@ -105,6 +106,14 @@ TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
 TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
 TELEGRAM_HOME_CHANNEL=${TELEGRAM_HOME_CHANNEL:-}
 EOF
+      else
+        cat > "$HERMES_HOME/profiles/$a/.env" <<EOF
+API_SERVER_KEY=$HERMES_API_KEY
+OPENAI_API_KEY=${OPENAI_API_KEY:-}
+GEMINI_API_KEY=${GEMINI_API_KEY:-}
+GOOGLE_API_KEY=${GEMINI_API_KEY:-}
+EOF
+      fi
     fi
   done
 fi
