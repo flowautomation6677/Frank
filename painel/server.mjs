@@ -216,14 +216,19 @@ async function enviarResposta(res, resposta, metodo) {
 }
 
 function criarServidor(env) {
-  const publica = env.FRANK_ORIGEM_PUBLICA ? new URL(env.FRANK_ORIGEM_PUBLICA) : null;
+  const origensPublicas = env.FRANK_ORIGEM_PUBLICA
+    ? env.FRANK_ORIGEM_PUBLICA.split(',').map((o) => {
+        try { return new URL(o.trim()); } catch { return null; }
+      }).filter(Boolean)
+    : [];
   return http.createServer(async (req, res) => {
     try {
       const portaLocal = req.socket.localPort;
       const hosts = [`127.0.0.1:${portaLocal}`, `localhost:${portaLocal}`];
       if (portaLocal === 80) hosts.push('127.0.0.1', 'localhost');
       const host = req.headers.host?.toLowerCase();
-      const viaProxy = publica !== null && host === publica.host;
+      const origemValida = origensPublicas.find((p) => host === p.host);
+      const viaProxy = Boolean(origemValida);
       // SSH pode usar outra porta no computador. Libera apenas hosts de loopback
       // literais; o middleware continua exigindo mesma origem para toda chamada.
       const portaTunel = /^(?:127\.0\.0\.1|localhost):(\d{1,5})$/.exec(host || '');
@@ -232,7 +237,7 @@ function criarServidor(env) {
       if ((!hosts.includes(host) && !viaProxy && !viaTunel) || !req.url.startsWith('/') || req.url.startsWith('//')) {
         throw new ErroHttp(403, 'Host não autorizado. Abra o Frank pelo endereço local.');
       }
-      const base = viaProxy ? publica.origin : `http://${host}`;
+      const base = viaProxy ? origemValida.origin : `http://${host}`;
       const url = new URL(req.url, base);
       if (url.origin !== new URL(base).origin) throw new ErroHttp(403, 'Destino não autorizado.');
       if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
