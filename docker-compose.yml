@@ -26,10 +26,14 @@ services:
       - FRANK_NOME_DA_EMPRESA=${FRANK_NOME_DA_EMPRESA:-Flow Automation}
       - FRANK_ACCESS_CODE=${FRANK_ACCESS_CODE:-}
       - FRANK_ORIGEM_PUBLICA=${FRANK_ORIGEM_PUBLICA:-}
+      # Provedor e Modelo do Hermes (openai-codex para ChatGPT Plus/Pro)
+      - HERMES_MODEL_PROVIDER=${HERMES_MODEL_PROVIDER:-openai-codex}
+      - HERMES_MODEL_DEFAULT=${HERMES_MODEL_DEFAULT:-gpt-6-sol}
     volumes:
       - frank_data:/app/data
       - hermes_home:/home/hermes/.hermes
       - empresa_banco:/home/hermes/empresa/banco
+      - ./scripts/docker-entrypoint.sh:/app/scripts/docker-entrypoint.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8787/api/saude || exit 1"]
       interval: 30s

@@ -81,8 +81,17 @@ if [ -x "$HERMES_BIN" ]; then
   $HERMES_BIN config set timezone "America/Sao_Paulo" 2>/dev/null || true
   $HERMES_BIN config set display.language "pt" 2>/dev/null || true
   $HERMES_BIN config set stt.language "pt" 2>/dev/null || true
-  $HERMES_BIN config set model.provider "gemini" 2>/dev/null || true
-  $HERMES_BIN config set model.default "gemini-3.5-flash" 2>/dev/null || true
+  PROVEDOR_CONFIGURADO="$($HERMES_BIN config get model.provider 2>/dev/null || true)"
+  PROVEDOR_ESCOLHIDO="${HERMES_MODEL_PROVIDER:-${PROVEDOR_CONFIGURADO:-openai-codex}}"
+  MODELO_CONFIGURADO="$($HERMES_BIN config get model.default 2>/dev/null || true)"
+  MODELO_ESCOLHIDO="${HERMES_MODEL_DEFAULT:-${MODELO_CONFIGURADO:-gpt-6-sol}}"
+
+  if [ -n "$PROVEDOR_ESCOLHIDO" ]; then
+    $HERMES_BIN config set model.provider "$PROVEDOR_ESCOLHIDO" 2>/dev/null || true
+  fi
+  if [ -n "$MODELO_ESCOLHIDO" ]; then
+    $HERMES_BIN config set model.default "$MODELO_ESCOLHIDO" 2>/dev/null || true
+  fi
   $HERMES_BIN config set gateway.multiplex_profiles true 2>/dev/null || true
 
   # Registrar agentes do time
